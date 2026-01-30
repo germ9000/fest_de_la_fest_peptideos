@@ -406,6 +406,44 @@ def main():
                     logger.error(f"Erro ao gerar PDF: {e}", exc_info=True)
                     st.error(f"❌ Erro ao gerar relatório: {str(e)}")
 
+# Etapa 1: Carregamento e Validação
+                status_text.text("📥 Carregando arquivo...")
+                progress_bar.progress(10)
+                
+                file_bytes = uploaded_file.read()
+                processor = get_fasta_processor(min_length, max_length)
+                df_input = processor.load_peptides_from_bytes(file_bytes, uploaded_file.name)
+                total_peptides = len(df_input)
+                
+                # --- NOVA MENSAGEM DE FEEDBACK ---
+                st.info(f"📄 Arquivo lido: {total_peptides} sequências brutas encontradas.")
+                
+                if total_peptides == 0:
+                    st.error("⚠️ Nenhuma sequência foi encontrada no arquivo. Verifique a formatação.")
+                    st.stop()
+                # ----------------------------------
 
+                status_text.text(f"✅ {total_peptides} peptídeos carregados. Validando...")
+                progress_bar.progress(30)
+                
+                df_valid = processor.validate_peptides(df_input)
+                valid_count = len(df_valid)
+                
+                # --- NOVA MENSAGEM DE FEEDBACK ---
+                if valid_count < total_peptides:
+                    st.warning(f"🧹 Filtragem: {total_peptides - valid_count} sequências removidas (inválidas ou tamanho incorreto).")
+                st.success(f"🧬 Processando {valid_count} sequências válidas.")
+                
+                if valid_count == 0:
+                    st.error("⚠️ Nenhuma sequência válida restou após os filtros de tamanho/caracteres.")
+                    st.stop()
+                # ----------------------------------
+                
+                status_text.text(f"✅ {valid_count} peptídeos válidos. Calculando propriedades...")
+                progress_bar.progress(50)
+                
+                # Aqui chama a função que estava dando erro antes
+                df_result = processor.add_physchem_properties(df_valid)
+                
 if __name__ == "__main__":
     main()
