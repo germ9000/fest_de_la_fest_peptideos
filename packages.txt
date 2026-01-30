@@ -1,0 +1,2 @@
+# Pacotes do sistema necessários para Streamlit Cloud
+# Deixe vazio se não houver dependências de sistema
