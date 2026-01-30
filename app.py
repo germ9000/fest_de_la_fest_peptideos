@@ -437,6 +437,29 @@ def main():
                 if valid_count == 0:
                     st.error("⚠️ Nenhuma sequência válida restou após os filtros de tamanho/caracteres.")
                     st.stop()
+           #-----------------------------
+                # ... (código anterior de carregamento) ...
+                
+                status_text.text(f"✅ {total_peptides} peptídeos carregados. Validando...")
+                progress_bar.progress(30)
+                
+                df_valid = processor.validate_peptides(df_input)
+                valid_count = len(df_valid)
+                
+                # --- BLOCO DE SEGURANÇA NOVO ---
+                if valid_count == 0:
+                    st.error(f"❌ Erro de Validação: Das {total_peptides} sequências carregadas, 0 restaram.")
+                    st.warning("Dica: Verifique se o 'Tamanho mínimo' e 'Máximo' nos filtros (barra lateral) condizem com seus dados. Se você carregou proteínas inteiras, aumente o tamanho máximo para 1000 ou mais.")
+                    st.stop() # PARA AQUI E NÃO TENTA CONTINUAR
+                # -------------------------------
+                
+                st.success(f"🧬 {valid_count} sequências válidas mantidas.")
+                
+                status_text.text(f"✅ {valid_count} peptídeos válidos. Calculando propriedades...")
+                progress_bar.progress(50)
+                
+                # Agora é seguro chamar, pois garantimos que não está vazio
+                df_result = processor.add_physchem_properties(df_valid)
                 # ----------------------------------
                 
                 status_text.text(f"✅ {valid_count} peptídeos válidos. Calculando propriedades...")
