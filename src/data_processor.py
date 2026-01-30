@@ -299,4 +299,36 @@ class FastaProcessor:
         df_result = pd.concat([df.reset_index(drop=True), props.reset_index(drop=True)], axis=1)
         
         logger.info("Propriedades físico-químicas calculadas com sucesso")
+        def add_physchem_properties(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adiciona propriedades físico-químicas ao DataFrame de peptídeos.
+    """
+    # --- PROTEÇÃO CONTRA DATAFRAME VAZIO ---
+    if df is None or df.empty:
+        return df
+    # ---------------------------------------
+
+    if 'peptide' not in df.columns:
+        raise ValueError("DataFrame deve conter coluna 'peptide'")
+    
+    # Calcula propriedades para cada peptídeo
+    try:
+        props = df['peptide'].apply(calculate_physchem_properties).apply(pd.Series)
+    except Exception:
+        # Se falhar no apply (ex: dados corrompidos), retorna o original
+        return df
+    
+    # Se o resultado for uma Series (1 linha apenas), converte para DataFrame
+    if isinstance(props, pd.Series):
+        props = props.to_frame().T
+        
+    # Remove colunas duplicadas antes de concatenar
+    cols_to_remove = [c for c in props.columns if c in df.columns]
+    if cols_to_remove:
+        df = df.drop(columns=cols_to_remove)
+    
+    # Concatena propriedades
+    df_result = pd.concat([df.reset_index(drop=True), props.reset_index(drop=True)], axis=1)
+    
+    return df_result
         return df_result
