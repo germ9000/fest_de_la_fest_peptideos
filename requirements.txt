@@ -30,3 +30,11 @@ scikit-learn>=1.0.0
 
 # Utilitários
 python-dateutil>=2.8.0
+streamlit==1.28.0
+pandas==2.1.0
+biopython==1.81
+fpdf2==2.7.4
+plotly==5.17.0
+requests==2.31.0
+mhcflurry==2.0.4
+concurrent-log-handler==0.9.24
